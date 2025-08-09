@@ -2,6 +2,7 @@ export interface IUser {
   id: string;
   username: string;
   email: string;
+  phone?: string;
   password: string;
   fullName?: string;
   role: 'user' | 'admin';
@@ -14,19 +15,21 @@ export interface IUser {
 export interface IUserCreate {
   username: string;
   email: string;
+  phone?: string;
   password: string;
   fullName?: string;
   role?: 'user' | 'admin';
 }
 
 export interface IUserLogin {
-  username: string;
+  identifier: string; // Can be username, email, or phone
   password: string;
 }
 
 export interface IUserUpdate {
   fullName?: string;
   email?: string;
+  phone?: string;
   currentPassword?: string;
   newPassword?: string;
 }

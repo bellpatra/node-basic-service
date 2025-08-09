@@ -28,6 +28,10 @@ export const userCreateSchema = userBaseSchema.extend({
     .string()
     .email('Invalid email format')
     .max(100, 'Email cannot exceed 100 characters'),
+  phone: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
+    .optional(),
   fullName: z
     .string()
     .min(2, 'Full name must be at least 2 characters')
@@ -36,9 +40,9 @@ export const userCreateSchema = userBaseSchema.extend({
   role: z.enum(['user', 'admin']).default('user')
 });
 
-// User login schema
+// User login schema - supports username, email, or phone
 export const userLoginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  identifier: z.string().min(1, 'Username, email, or phone is required'),
   password: z.string().min(1, 'Password is required')
 });
 
@@ -64,6 +68,10 @@ export const userUpdateSchema = z.object({
     .string()
     .email('Invalid email format')
     .max(100, 'Email cannot exceed 100 characters')
+    .optional(),
+  phone: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format')
     .optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().optional(),

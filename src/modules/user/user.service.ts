@@ -28,21 +28,31 @@ export class UserService {
    * caches the user, and emits user created events.
    */
   static async createUser(userData: IUserCreate): Promise<Omit<IUser, 'password'>> {
-    // Check if username or email already exists
+    // Build OR conditions for uniqueness check
+    const orConditions = [
+      { username: userData.username },
+      { email: userData.email }
+    ];
+    
+    // Add phone to uniqueness check if provided
+    if (userData.phone) {
+      orConditions.push({ phone: userData.phone });
+    }
+
+    // Check if username, email, or phone already exists
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { username: userData.username },
-          { email: userData.email }
-        ]
+        OR: orConditions
       }
     });
 
     if (existingUser) {
       if (existingUser.username === userData.username) {
         throw new Error('Username already taken');
-      } else {
+      } else if (existingUser.email === userData.email) {
         throw new Error('Email already registered');
+      } else if (existingUser.phone === userData.phone) {
+        throw new Error('Phone number already registered');
       }
     }
 
@@ -54,6 +64,7 @@ export class UserService {
       data: {
         username: userData.username,
         email: userData.email,
+        phone: userData.phone,
         password: hashedPassword,
         fullName: userData.fullName,
         role: userData.role || 'user',
@@ -79,18 +90,19 @@ export class UserService {
   }
 
   /**
-   * Authenticates a user by username/email and password, updates last login,
+   * Authenticates a user by username/email/phone and password, updates last login,
    * generates tokens, caches refresh token, and emits login events.
    */
   static async login(loginData: IUserLogin): Promise<IAuthResponse> {
-    const { username, password } = loginData;
+    const { identifier, password } = loginData;
 
-    // Find user
+    // Find user by username, email, or phone
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { username },
-          { email: username } // Allow login with email too
+          { username: identifier },
+          { email: identifier },
+          { phone: identifier }
         ]
       }
     });
@@ -239,6 +251,7 @@ export class UserService {
     
     if (updateData.fullName) updateFields.fullName = updateData.fullName;
     if (updateData.email) updateFields.email = updateData.email;
+    if (updateData.phone) updateFields.phone = updateData.phone;
     if (updateData.newPassword) {
       updateFields.password = await SecurityUtils.hashPassword(updateData.newPassword);
       
