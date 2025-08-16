@@ -6,6 +6,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { requestLogger, errorLogger } from './utils/logger';
 import userRoutes from './modules/user/user.route';
+import qrRoutes from './modules/qr/qr.route';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { ApiResponse } from './utils/validation';
 
@@ -289,6 +290,12 @@ app.get('/', (req, res) => {
             </div>
             
             <div class="feature-card">
+                <h3><span class="icon">📱</span> QR Code Authentication</h3>
+                <p>Modern QR code-based authentication system with three types: API-based, Explanation-based, and Magic Link. 
+                   Secure, fast, and user-friendly mobile authentication.</p>
+            </div>
+            
+            <div class="feature-card">
                 <h3><span class="icon">⚡</span> High Performance</h3>
                 <p>Redis caching for improved response times, connection pooling, and optimized database queries. 
                    Built for scalability and high-traffic applications.</p>
@@ -338,6 +345,10 @@ app.get('/', (req, res) => {
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
                     <h4 style="color: #667eea; margin-bottom: 10px;">🔐 Authentication</h4>
                     <p style="color: #666; font-size: 0.9rem;">User registration, login, and token management</p>
+                </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
+                    <h4 style="color: #667eea; margin-bottom: 10px;">📱 QR Authentication</h4>
+                    <p style="color: #666; font-size: 0.9rem;">Generate and verify QR codes for secure login</p>
                 </div>
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
                     <h4 style="color: #667eea; margin-bottom: 10px;">👤 User Management</h4>
@@ -398,6 +409,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/qr', qrRoutes);
 
 // Error handling
 app.use(errorLogger);

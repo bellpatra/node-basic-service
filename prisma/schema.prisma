@@ -23,5 +23,63 @@ model User {
   token     String?
   updatedAt DateTime  @updatedAt
 
+  // Relations
+  qrCodes     QRCode[]
+  loginHistory LoginHistory[]
+
   @@map("users")
+}
+
+model QRCode {
+  id          String      @id @default(uuid())
+  code        String      @unique // Unique QR code identifier
+  type        QRCodeType
+  data        Json        // QR code data (endpoint, token, etc.)
+  metadata    Json?       // Additional metadata
+  expiresAt   DateTime
+  isActive    Boolean     @default(true)
+  usageCount  Int         @default(0)
+  maxUsage    Int?        // null = unlimited
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  verifications QRVerification[]
+
+  @@map("qr_codes")
+}
+
+model QRVerification {
+  id        String   @id @default(uuid())
+  qrCodeId  String
+  qrCode    QRCode  @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  success   Boolean
+  metadata  Json?   // Additional verification data
+  createdAt DateTime @default(now())
+
+  @@map("qr_verifications")
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method    String   // 'password', 'qr_api', 'qr_explanation', 'qr_magic_link'
+  ipAddress String?
+  userAgent String?
+  success   Boolean
+  metadata  Json?   // Additional login data
+  createdAt DateTime @default(now())
+
+  @@map("login_history")
+}
+
+enum QRCodeType {
+  API
+  EXPLANATION
+  MAGIC_LINK
 }

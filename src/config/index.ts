@@ -5,6 +5,7 @@ dotenv.config();
 
 export const config = {
   port: process.env.PORT || 3000,
+  apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000',
   jwt: {
     secret: process.env.JWT_SECRET || 'your-super-secret-key-change-this-in-production',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-change-this',
