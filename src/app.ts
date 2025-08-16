@@ -296,6 +296,12 @@ app.get('/', (req, res) => {
             </div>
             
             <div class="feature-card">
+                <h3><span class="icon">🔄</span> WhatsApp-Style Auto-Refresh</h3>
+                <p>Real-time QR code authentication with auto-refresh every 5 seconds, WebSocket support, and instant login 
+                   when QR codes are scanned - just like WhatsApp Web!</p>
+            </div>
+            
+            <div class="feature-card">
                 <h3><span class="icon">⚡</span> High Performance</h3>
                 <p>Redis caching for improved response times, connection pooling, and optimized database queries. 
                    Built for scalability and high-traffic applications.</p>
@@ -333,9 +339,16 @@ app.get('/', (req, res) => {
             </p>
             
             <div style="text-align: center; padding: 40px;">
-                <a href="/api-docs" class="cta-button" style="font-size: 1.3rem; padding: 20px 40px;">
+                <a href="/api-docs" class="cta-button" style="font-size: 1.3rem; padding: 20px 40px; margin-bottom: 20px; display: inline-block;">
                     🚀 Open Swagger Documentation
                 </a>
+                
+                <div style="margin-top: 30px;">
+                    <a href="/qr-login" class="cta-button" style="font-size: 1.2rem; padding: 18px 35px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border: none; margin: 0 10px;">
+                        📱 Try WhatsApp-Style QR Login
+                    </a>
+                </div>
+                
                 <p style="margin-top: 20px; color: #666; font-size: 1rem;">
                     Test endpoints, view schemas, and explore the complete API reference
                 </p>
@@ -410,6 +423,286 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/qr', qrRoutes);
+
+// WhatsApp-like QR Login Page
+app.get('/qr-login', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QR Code Login - Like WhatsApp Web</title>
+        <script src="/socket.io/socket.io.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .qr-container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+                margin-bottom: 20px;
+                color: #667eea;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+                color: #333;
+                margin-bottom: 10px;
+                font-weight: 600;
+            }
+            
+            .subtitle {
+                color: #666;
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
+            
+            .qr-code {
+                margin: 30px 0;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 15px;
+            }
+            
+            .qr-code img {
+                max-width: 200px;
+                height: auto;
+                border-radius: 10px;
+            }
+            
+            .status {
+                padding: 15px;
+                border-radius: 10px;
+                margin: 20px 0;
+                font-weight: 500;
+            }
+            
+            .status.waiting {
+                background: #e3f2fd;
+                color: #1976d2;
+                border: 1px solid #bbdefb;
+            }
+            
+            .status.success {
+                background: #e8f5e8;
+                color: #2e7d32;
+                border: 1px solid #c8e6c9;
+            }
+            
+            .status.error {
+                background: #ffebee;
+                color: #c62828;
+                border: 1px solid #ffcdd2;
+            }
+            
+            .refresh-info {
+                color: #666;
+                font-size: 0.9rem;
+                margin-top: 20px;
+            }
+            
+            .loading {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 10px;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            .user-info {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+                display: none;
+            }
+            
+            .user-info.show {
+                display: block;
+            }
+            
+            .user-avatar {
+                width: 60px;
+                height: 60px;
+                background: #667eea;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+                margin: 0 auto 15px;
+            }
+            
+            .user-name {
+                font-size: 1.2rem;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 5px;
+            }
+            
+            .user-email {
+                color: #666;
+                font-size: 0.9rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="qr-container">
+            <div class="logo">📱</div>
+            <h1 class="title">QR Code Login</h1>
+            <p class="subtitle">Scan this QR code with your mobile app to log in automatically</p>
+            
+            <div class="qr-code">
+                <img id="qrImage" src="" alt="QR Code">
+            </div>
+            
+            <div class="status waiting" id="status">
+                <span class="loading"></span>
+                Waiting for QR code scan...
+            </div>
+            
+            <div class="refresh-info">
+                QR code refreshes automatically every 5 seconds
+            </div>
+            
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">👤</div>
+                <div class="user-name" id="userName"></div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+        </div>
+
+        <script>
+            // Connect to WebSocket
+            const socket = io();
+            
+            let currentSessionId = null;
+            let refreshInterval = null;
+            
+            // Generate initial QR code
+            generateQRCode();
+            
+            // Listen for WebSocket events
+            socket.on('qr-authenticated', (data) => {
+                console.log('QR authenticated:', data);
+                showSuccess(data);
+            });
+            
+            socket.on('connect', () => {
+                console.log('Connected to WebSocket');
+            });
+            
+            socket.on('disconnect', () => {
+                console.log('Disconnected from WebSocket');
+            });
+            
+            async function generateQRCode() {
+                try {
+                    const response = await fetch('/api/qr/session');
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        document.getElementById('qrImage').src = result.data.qrCode;
+                        currentSessionId = result.data.sessionId;
+                        
+                        // Set up auto-refresh
+                        if (refreshInterval) {
+                            clearInterval(refreshInterval);
+                        }
+                        
+                        refreshInterval = setInterval(() => {
+                            generateQRCode();
+                        }, 5000); // Refresh every 5 seconds
+                        
+                        updateStatus('waiting', 'Waiting for QR code scan...');
+                    } else {
+                        updateStatus('error', 'Failed to generate QR code');
+                    }
+                } catch (error) {
+                    console.error('Error generating QR code:', error);
+                    updateStatus('error', 'Error generating QR code');
+                }
+            }
+            
+            function updateStatus(type, message) {
+                const statusEl = document.getElementById('status');
+                statusEl.className = \`status \${type}\`;
+                
+                if (type === 'waiting') {
+                    statusEl.innerHTML = \`<span class="loading"></span>\${message}\`;
+                } else {
+                    statusEl.innerHTML = message;
+                }
+            }
+            
+            function showSuccess(userData) {
+                updateStatus('success', 'Login successful! Welcome back!');
+                
+                // Show user info
+                document.getElementById('userAvatar').textContent = userData.username.charAt(0).toUpperCase();
+                document.getElementById('userName').textContent = userData.username;
+                document.getElementById('userEmail').textContent = userData.email;
+                document.getElementById('userInfo').classList.add('show');
+                
+                // Stop auto-refresh
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+                
+                // Redirect after 3 seconds
+                setTimeout(() => {
+                    window.location.href = '/api-docs';
+                }, 3000);
+            }
+            
+            // Handle page visibility change to pause/resume refresh
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    if (refreshInterval) {
+                        clearInterval(refreshInterval);
+                    }
+                } else {
+                    if (!refreshInterval) {
+                        generateQRCode();
+                    }
+                }
+            });
+        </script>
+    </body>
+    </html>
+  `);
+});
 
 // Error handling
 app.use(errorLogger);

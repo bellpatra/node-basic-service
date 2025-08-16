@@ -5,6 +5,7 @@ import { Logger } from '../../utils/logger';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
 import { config } from '../../config';
+import { io } from '../../server';
 
 // Cache keys
 const QR_CACHE_KEY = 'qr:';
@@ -269,6 +270,17 @@ export class QRService {
       });
 
       Logger.info(`QR authentication successful for user ${qrCode.user.id}, type: ${qrCode.type}`);
+
+      // Emit WebSocket event for real-time frontend updates
+      if (io) {
+        io.emit('qr-authenticated', {
+          userId: qrCode.user.id,
+          username: qrCode.user.username,
+          email: qrCode.user.email,
+          timestamp: new Date().toISOString(),
+          qrCodeId: qrCode.id
+        });
+      }
 
       return {
         user: qrCode.user,

@@ -322,4 +322,102 @@ router.get('/my-codes', authMiddleware, QRController.getUserQRCodes);
  */
 router.delete('/:code', authMiddleware, QRController.deactivateQRCode);
 
+/**
+ * @swagger
+ * /api/qr/session:
+ *   get:
+ *     summary: Get session QR code for frontend display
+ *     tags: [QR Authentication]
+ *     description: Generate a session QR code that auto-refreshes and supports real-time authentication
+ *     responses:
+ *       200:
+ *         description: Session QR code generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Session QR code generated successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     sessionId:
+ *                       type: string
+ *                       description: Unique session identifier
+ *                     qrCode:
+ *                       type: string
+ *                       description: Base64 encoded QR code image
+ *                     expiresAt:
+ *                       type: string
+ *                       format: date-time
+ *                       description: When the QR code expires
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/session', QRController.generateSessionQRCode);
+
+/**
+ * @swagger
+ * /api/qr/verify-session:
+ *   post:
+ *     summary: Verify session QR code for auto-login
+ *     tags: [QR Authentication]
+ *     description: Verify a session QR code and automatically log in the user (like WhatsApp Web)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sessionId
+ *               - userId
+ *             properties:
+ *               sessionId:
+ *                 type: string
+ *                 description: Session identifier from QR code
+ *               userId:
+ *                 type: string
+ *                 description: User ID to authenticate
+ *     responses:
+ *       200:
+ *         description: Session verified and user logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Session verified successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       type: object
+ *                       description: Authenticated user information
+ *                     token:
+ *                       type: string
+ *                       description: JWT authentication token
+ *       400:
+ *         description: Invalid session or user
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/verify-session', QRController.verifySessionQRCode);
+
 export default router;
