@@ -67,6 +67,16 @@ const user_schema_1 = require("./user.schema");
  *           nullable: true
  *           description: User's authentication token
  *
+ *     RefreshTokenInput:
+ *       type: object
+ *       required:
+ *         - refreshToken
+ *       properties:
+ *         refreshToken:
+ *           type: string
+ *           description: JWT refresh token
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *
  *     UserCreate:
  *       type: object
  *       required:
@@ -236,6 +246,46 @@ router.post('/register', (0, validation_1.validateRequest)(user_schema_1.userCre
  *         description: Internal server error
  */
 router.post('/login', (0, validation_1.validateRequest)(user_schema_1.userLoginSchema), user_controller_1.UserController.login);
+/**
+ * @swagger
+ * /api/users/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     tags: [Authentication]
+ *     description: Get a new access token using a valid refresh token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RefreshTokenInput'
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             $ref: '#/components/schemas/RefreshTokenInput'
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *         headers:
+ *           Set-Cookie:
+ *             description: HTTP-only refresh token cookie
+ *             schema:
+ *               type: string
+ *               example: refreshToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict
+ *       400:
+ *         description: Invalid refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized - Invalid or expired refresh token
+ *       500:
+ *         description: Internal server error
+ */
 // Refreshes the access token using a refresh token
 router.post('/refresh-token', (0, validation_1.validateRequest)(user_schema_1.refreshTokenSchema), user_controller_1.UserController.refreshToken);
 /**

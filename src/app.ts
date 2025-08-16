@@ -421,7 +421,6 @@ app.get('/', (req, res) => {
         <div style="text-align: center; margin: 40px 0;">
             <a href="/api-docs" class="cta-button" style="background: linear-gradient(45deg, #667eea, #764ba2); transform: scale(1.1);">🚀 Open Swagger Docs</a>
             <a href="/health" class="cta-button">🔍 Check API Health</a>
-            <a href="/api/users/register" class="cta-button">📝 Test Registration</a>
         </div>
         
         <div class="footer">
