@@ -15,15 +15,11 @@ export const validateRequest = (schema: z.ZodSchema) => {
         const validationErrors = error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message,
-          code: err.code
+          code: err.code,
         }));
-        
-        const response = ApiResponse.fail(
-          'Validation failed',
-          400,
-          validationErrors
-        );
-        
+
+        const response = ApiResponse.fail('Validation failed', 400, validationErrors);
+
         return ApiResponse.send(res, response);
       }
       next(error);
@@ -59,7 +55,7 @@ export interface IApiResponse<T = any> {
 
 /**
  * Utility class for formatting standardized API responses and handling try/catch logic.
- * 
+ *
  * Response Structure:
  * - status: 'success' | 'error' | 'fail'
  * - statusCode: HTTP status code
@@ -73,8 +69,8 @@ export class ApiResponse {
    * Creates a success response
    */
   static success<T>(
-    data?: T, 
-    message: string = 'Operation successful', 
+    data?: T,
+    message: string = 'Operation successful',
     statusCode: number = 200,
     meta?: IApiResponse['meta']
   ): IApiResponse<T> {
@@ -85,8 +81,8 @@ export class ApiResponse {
       ...(data !== undefined && { data }),
       meta: {
         timestamp: new Date().toISOString(),
-        ...meta
-      }
+        ...meta,
+      },
     };
   }
 
@@ -94,7 +90,7 @@ export class ApiResponse {
    * Creates an error response for server errors (5xx)
    */
   static error(
-    message: string = 'Internal server error', 
+    message: string = 'Internal server error',
     statusCode: number = 500,
     meta?: IApiResponse['meta']
   ): IApiResponse {
@@ -104,8 +100,8 @@ export class ApiResponse {
       message,
       meta: {
         timestamp: new Date().toISOString(),
-        ...meta
-      }
+        ...meta,
+      },
     };
   }
 
@@ -113,7 +109,7 @@ export class ApiResponse {
    * Creates a fail response for client errors (4xx)
    */
   static fail(
-    message: string = 'Bad request', 
+    message: string = 'Bad request',
     statusCode: number = 400,
     errors?: IApiResponse['errors'],
     meta?: IApiResponse['meta']
@@ -125,8 +121,8 @@ export class ApiResponse {
       ...(errors && { errors }),
       meta: {
         timestamp: new Date().toISOString(),
-        ...meta
-      }
+        ...meta,
+      },
     };
   }
 
@@ -134,7 +130,7 @@ export class ApiResponse {
    * Creates a paginated success response
    */
   static paginated<T>(
-    data: T[], 
+    data: T[],
     pagination: {
       page: number;
       limit: number;
@@ -145,7 +141,7 @@ export class ApiResponse {
     meta?: Omit<IApiResponse['meta'], 'pagination'>
   ): IApiResponse<T[]> {
     const totalPages = Math.ceil(pagination.total / pagination.limit);
-    
+
     return {
       status: 'success',
       statusCode,
@@ -155,10 +151,10 @@ export class ApiResponse {
         timestamp: new Date().toISOString(),
         pagination: {
           ...pagination,
-          totalPages
+          totalPages,
         },
-        ...meta
-      }
+        ...meta,
+      },
     };
   }
 
@@ -185,38 +181,31 @@ export class ApiResponse {
       return ApiResponse.send(res, response);
     } catch (error) {
       console.error('API Error:', error);
-      
+
       // Handle different error types
       if (error instanceof z.ZodError) {
         const validationErrors = error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message,
-          code: err.code
+          code: err.code,
         }));
-        
-        const response = ApiResponse.fail(
-          'Validation failed',
-          400,
-          validationErrors,
-          meta
-        );
+
+        const response = ApiResponse.fail('Validation failed', 400, validationErrors, meta);
         return ApiResponse.send(res, response);
       }
-      
+
       // Handle custom errors with statusCode
-      const statusCode = error instanceof Error && (error as any).statusCode 
-        ? (error as any).statusCode 
-        : 500;
-      
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : 'Internal server error';
-      
+      const statusCode =
+        error instanceof Error && (error as any).statusCode ? (error as any).statusCode : 500;
+
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+
       // Use fail for client errors (4xx), error for server errors (5xx)
-      const response = statusCode >= 400 && statusCode < 500
-        ? ApiResponse.fail(errorMessage, statusCode, undefined, meta)
-        : ApiResponse.error(errorMessage, statusCode, meta);
-        
+      const response =
+        statusCode >= 400 && statusCode < 500
+          ? ApiResponse.fail(errorMessage, statusCode, undefined, meta)
+          : ApiResponse.error(errorMessage, statusCode, meta);
+
       return ApiResponse.send(res, response);
     }
   }
@@ -234,20 +223,14 @@ export class ApiResponse {
   /**
    * Creates an unauthorized response
    */
-  static unauthorized(
-    message: string = 'Unauthorized',
-    meta?: IApiResponse['meta']
-  ): IApiResponse {
+  static unauthorized(message: string = 'Unauthorized', meta?: IApiResponse['meta']): IApiResponse {
     return ApiResponse.fail(message, 401, undefined, meta);
   }
 
   /**
    * Creates a forbidden response
    */
-  static forbidden(
-    message: string = 'Forbidden',
-    meta?: IApiResponse['meta']
-  ): IApiResponse {
+  static forbidden(message: string = 'Forbidden', meta?: IApiResponse['meta']): IApiResponse {
     return ApiResponse.fail(message, 403, undefined, meta);
   }
 
@@ -271,11 +254,6 @@ export class ApiResponse {
     code?: string,
     meta?: IApiResponse['meta']
   ): IApiResponse {
-    return ApiResponse.fail(
-      'Validation failed',
-      400,
-      [{ field, message, code }],
-      meta
-    );
+    return ApiResponse.fail('Validation failed', 400, [{ field, message, code }], meta);
   }
 }

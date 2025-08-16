@@ -1,6 +1,6 @@
 /**
  * Multi-Identifier Login Examples
- * 
+ *
  * This file demonstrates how users can now login with username, email, or phone number
  * using the updated authentication system.
  */
@@ -66,30 +66,29 @@ VALIDATION RULES:
 // ====================================
 
 export class MultiLoginExamples {
-  
   // Successful login response (same for all identifier types)
   static successfulLogin(res: Response) {
     const response = ApiResponse.success(
       {
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         user: {
-          id: "123e4567-e89b-12d3-a456-426614174000",
-          username: "johndoe",
-          email: "john@example.com",
-          phone: "+1234567890",
-          fullName: "John Doe",
-          role: "user",
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          username: 'johndoe',
+          email: 'john@example.com',
+          phone: '+1234567890',
+          fullName: 'John Doe',
+          role: 'user',
           isActive: true,
-          lastLogin: "2024-01-15T10:30:00.000Z",
-          createdAt: "2024-01-01T00:00:00.000Z",
-          updatedAt: "2024-01-15T10:30:00.000Z"
-        }
+          lastLogin: '2024-01-15T10:30:00.000Z',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-15T10:30:00.000Z',
+        },
       },
       'Login successful'
     );
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "success",
@@ -122,7 +121,7 @@ export class MultiLoginExamples {
   static invalidCredentials(res: Response) {
     const response = ApiResponse.fail('Invalid credentials', 401);
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -139,7 +138,7 @@ export class MultiLoginExamples {
   static accountDeactivated(res: Response) {
     const response = ApiResponse.fail('Account is deactivated', 403);
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -158,13 +157,13 @@ export class MultiLoginExamples {
       {
         field: 'phone',
         message: 'Invalid phone number format',
-        code: 'invalid_format'
+        code: 'invalid_format',
       },
       {
         field: 'password',
         message: 'Password must contain uppercase, lowercase, number, and special character',
-        code: 'weak_password'
-      }
+        code: 'weak_password',
+      },
     ]);
     return ApiResponse.send(res, response);
   }

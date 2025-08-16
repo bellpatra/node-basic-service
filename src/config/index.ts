@@ -13,17 +13,19 @@ export const config = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   },
   database: {
-    url: process.env.DATABASE_URL
+    url: process.env.DATABASE_URL,
   },
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD,
-    url: process.env.REDIS_URL || `redis://${process.env.REDIS_PASSWORD ? ':' + process.env.REDIS_PASSWORD + '@' : ''}${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`
+    url:
+      process.env.REDIS_URL ||
+      `redis://${process.env.REDIS_PASSWORD ? ':' + process.env.REDIS_PASSWORD + '@' : ''}${process.env.REDIS_HOST || 'localhost'}:${process.env.REDIS_PORT || '6379'}`,
   },
   kafka: {
     clientId: 'auth-service',
     brokers: (process.env.KAFKA_BROKERS || 'localhost:9092').split(','),
-    groupId: 'auth-service-group'
-  }
+    groupId: 'auth-service-group',
+  },
 };

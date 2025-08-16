@@ -98,7 +98,7 @@ export const rateLimiter = (maxRequests = 100, windowMs = 60000) => {
     if (recentRequests.length >= maxRequests) {
       return res.status(429).json({
         status: 'error',
-        message: 'Too many requests, please try again later.'
+        message: 'Too many requests, please try again later.',
       });
     }
 

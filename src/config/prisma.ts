@@ -1,6 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 
-
 // Initialize Prisma client for database access
 const prisma = new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],

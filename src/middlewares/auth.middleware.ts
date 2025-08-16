@@ -20,17 +20,13 @@ declare global {
  * Express middleware to authenticate requests using JWT in the Authorization header.
  * Attaches user info to req.user if valid, else returns 401.
  */
-export const authMiddleware = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
+        message: 'No token provided',
       });
     }
 
@@ -38,14 +34,14 @@ export const authMiddleware = async (
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
 
     req.user = {
-      id: decoded.userId
+      id: decoded.userId,
     };
 
     next();
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: 'Invalid token'
+      message: 'Invalid token',
     });
   }
 };

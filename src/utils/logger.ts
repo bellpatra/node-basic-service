@@ -4,7 +4,7 @@ enum LogLevel {
   INFO = 'INFO',
   WARN = 'WARN',
   ERROR = 'ERROR',
-  DEBUG = 'DEBUG'
+  DEBUG = 'DEBUG',
 }
 
 interface LogMessage {
@@ -29,7 +29,7 @@ export class Logger {
       level: LogLevel.INFO,
       message,
       timestamp: new Date().toISOString(),
-      metadata
+      metadata,
     };
     console.log(this.formatMessage(logMessage));
   }
@@ -39,7 +39,7 @@ export class Logger {
       level: LogLevel.WARN,
       message,
       timestamp: new Date().toISOString(),
-      metadata
+      metadata,
     };
     console.warn(this.formatMessage(logMessage));
   }
@@ -49,7 +49,7 @@ export class Logger {
       level: LogLevel.ERROR,
       message: `${message} | ${error?.stack || error?.message || 'Unknown error'}`,
       timestamp: new Date().toISOString(),
-      metadata
+      metadata,
     };
     console.error(this.formatMessage(logMessage));
   }
@@ -60,7 +60,7 @@ export class Logger {
         level: LogLevel.DEBUG,
         message,
         timestamp: new Date().toISOString(),
-        metadata
+        metadata,
       };
       console.debug(this.formatMessage(logMessage));
     }
@@ -70,11 +70,7 @@ export class Logger {
 /**
  * Express middleware to log all incoming requests and their response status/duration.
  */
-export const requestLogger = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
 
   res.on('finish', () => {
@@ -85,7 +81,7 @@ export const requestLogger = (
       statusCode: res.statusCode,
       duration: `${duration}ms`,
       userAgent: req.get('user-agent'),
-      ip: req.ip
+      ip: req.ip,
     };
 
     if (res.statusCode >= 400) {
@@ -101,18 +97,13 @@ export const requestLogger = (
 /**
  * Express error-handling middleware to log unhandled errors with request context.
  */
-export const errorLogger = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorLogger = (error: Error, req: Request, res: Response, next: NextFunction) => {
   Logger.error('Unhandled error', error, {
     method: req.method,
     path: req.path,
     body: req.body,
     query: req.query,
-    ip: req.ip
+    ip: req.ip,
   });
 
   next(error);

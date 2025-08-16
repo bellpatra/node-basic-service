@@ -5,13 +5,13 @@ const redis = new Redis({
   host: config.redis.host,
   port: config.redis.port,
   password: config.redis.password,
-  retryStrategy: (times) => {
+  retryStrategy: times => {
     const delay = Math.min(times * 50, 2000);
     return delay;
   },
 });
 
-redis.on('error', (error) => {
+redis.on('error', error => {
   console.error('Redis connection error:', error);
 });
 

@@ -20,16 +20,13 @@ export class SecurityUtils {
     return bcrypt.hash(password, salt);
   }
 
-  static async comparePasswords(
-    plainPassword: string,
-    hashedPassword: string
-  ): Promise<boolean> {
+  static async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
 
   static generateToken(payload: TokenPayload): string {
     return jwt.sign(payload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn
+      expiresIn: config.jwt.expiresIn,
     } as jwt.SignOptions);
   }
 
@@ -52,7 +49,7 @@ export class SecurityUtils {
 
   static generateRefreshToken(userId: string): string {
     return jwt.sign({ userId }, config.jwt.refreshSecret, {
-      expiresIn: config.jwt.refreshExpiresIn
+      expiresIn: config.jwt.refreshExpiresIn,
     } as jwt.SignOptions);
   }
 
@@ -85,28 +82,28 @@ export class PasswordValidator {
     if (password.length < minLength) {
       return {
         isValid: false,
-        message: `Password must be at least ${minLength} characters long`
+        message: `Password must be at least ${minLength} characters long`,
       };
     }
 
     if (!hasUpperCase || !hasLowerCase) {
       return {
         isValid: false,
-        message: 'Password must contain both uppercase and lowercase letters'
+        message: 'Password must contain both uppercase and lowercase letters',
       };
     }
 
     if (!hasNumbers) {
       return {
         isValid: false,
-        message: 'Password must contain at least one number'
+        message: 'Password must contain at least one number',
       };
     }
 
     if (!hasSpecialChar) {
       return {
         isValid: false,
-        message: 'Password must contain at least one special character'
+        message: 'Password must contain at least one special character',
       };
     }
 

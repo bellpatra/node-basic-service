@@ -1,6 +1,6 @@
 /**
  * API Response Examples
- * 
+ *
  * This file demonstrates how to use the standardized API response format
  * across your Node.js service. All responses follow a consistent structure.
  */
@@ -37,7 +37,6 @@ Standard Response Format:
 // ====================================
 
 export class ApiResponseExamples {
-  
   // Basic success response
   static basicSuccess(res: Response) {
     const response = ApiResponse.success(
@@ -45,7 +44,7 @@ export class ApiResponseExamples {
       'User retrieved successfully'
     );
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "success",
@@ -71,11 +70,11 @@ export class ApiResponseExamples {
       {
         timestamp: new Date().toISOString(),
         requestId: 'req_123456',
-        version: '1.0.0'
+        version: '1.0.0',
       }
     );
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "success",
@@ -96,12 +95,9 @@ export class ApiResponseExamples {
 
   // Success without data
   static successNoData(res: Response) {
-    const response = ApiResponse.success(
-      undefined,
-      'Operation completed successfully'
-    );
+    const response = ApiResponse.success(undefined, 'Operation completed successfully');
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "success",
@@ -118,20 +114,20 @@ export class ApiResponseExamples {
   static paginatedResponse(res: Response) {
     const users = [
       { id: 1, name: 'John Doe' },
-      { id: 2, name: 'Jane Smith' }
+      { id: 2, name: 'Jane Smith' },
     ];
-    
+
     const response = ApiResponse.paginated(
       users,
       {
         page: 1,
         limit: 10,
-        total: 25
+        total: 25,
       },
       'Users retrieved successfully'
     );
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "success",
@@ -160,12 +156,9 @@ export class ApiResponseExamples {
 
   // Client error (4xx) - fail status
   static clientError(res: Response) {
-    const response = ApiResponse.fail(
-      'Invalid user ID provided',
-      400
-    );
+    const response = ApiResponse.fail('Invalid user ID provided', 400);
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -180,12 +173,9 @@ export class ApiResponseExamples {
 
   // Server error (5xx) - error status
   static serverError(res: Response) {
-    const response = ApiResponse.error(
-      'Database connection failed',
-      500
-    );
+    const response = ApiResponse.error('Database connection failed', 500);
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "error",
@@ -204,16 +194,16 @@ export class ApiResponseExamples {
       {
         field: 'email',
         message: 'Invalid email format',
-        code: 'invalid_email'
+        code: 'invalid_email',
       },
       {
         field: 'password',
         message: 'Password must be at least 8 characters',
-        code: 'min_length'
-      }
+        code: 'min_length',
+      },
     ]);
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -240,13 +230,9 @@ export class ApiResponseExamples {
 
   // Single field validation error
   static singleFieldValidationError(res: Response) {
-    const response = ApiResponse.singleFieldError(
-      'password',
-      'Required',
-      'required'
-    );
+    const response = ApiResponse.singleFieldError('password', 'Required', 'required');
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -274,7 +260,7 @@ export class ApiResponseExamples {
   static notFound(res: Response) {
     const response = ApiResponse.notFound('User not found');
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -291,7 +277,7 @@ export class ApiResponseExamples {
   static unauthorized(res: Response) {
     const response = ApiResponse.unauthorized('Authentication required');
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -308,7 +294,7 @@ export class ApiResponseExamples {
   static forbidden(res: Response) {
     const response = ApiResponse.forbidden('Insufficient permissions');
     return ApiResponse.send(res, response);
-    
+
     /* Response:
     {
       "status": "fail",
@@ -338,7 +324,7 @@ export class ApiResponseExamples {
       200,
       {
         timestamp: new Date().toISOString(),
-        requestId: 'req_123456'
+        requestId: 'req_123456',
       }
     );
   }
