@@ -66,8 +66,9 @@ export class UserService {
         email: userData.email,
         phone: userData.phone,
         password: hashedPassword,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         fullName: userData.fullName,
-        role: (userData.role || 'user') as string,
         isActive: true
       }
     });
@@ -130,6 +131,12 @@ export class UserService {
     // Generate tokens
     const { accessToken, refreshToken } = this.generateAuthTokens(user);
     
+    // Save token to database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { token: accessToken }
+    });
+    
     // Cache refresh token
     await CacheService.set(`${USER_TOKEN_CACHE_KEY}${user.id}`, refreshToken, 30 * 24 * 60 * 60); // 30 days
 
@@ -182,6 +189,12 @@ export class UserService {
 
       // Generate new tokens
       const tokens = this.generateAuthTokens(user);
+      
+      // Save new token to database
+      await prisma.user.update({
+        where: { id: userId },
+        data: { token: tokens.accessToken }
+      });
       
       // Update cached refresh token
       await CacheService.set(`${USER_TOKEN_CACHE_KEY}${userId}`, tokens.refreshToken, 30 * 24 * 60 * 60);
@@ -327,7 +340,11 @@ export class UserService {
     // Delete token
     await CacheService.del(`${PASSWORD_RESET_CACHE_KEY}${token}`);
     
-    // Invalidate user tokens
+    // Clear token from database and invalidate user tokens
+    await prisma.user.update({
+      where: { id: userId },
+      data: { token: null }
+    });
     await CacheService.del(`${USER_TOKEN_CACHE_KEY}${userId}`);
 
     // Emit password changed event
@@ -336,6 +353,20 @@ export class UserService {
     } catch (error) {
       Logger.error('Failed to emit password changed event', error as Error);
     }
+  }
+
+  /**
+   * Logs out a user by clearing their tokens.
+   */
+  static async logout(userId: string): Promise<void> {
+    // Clear token from database
+    await prisma.user.update({
+      where: { id: userId },
+      data: { token: null }
+    });
+    
+    // Clear cached refresh token
+    await CacheService.del(`${USER_TOKEN_CACHE_KEY}${userId}`);
   }
 
   /**

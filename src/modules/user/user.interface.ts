@@ -4,12 +4,14 @@ export interface IUser {
   email: string;
   phone?: string | null;
   password: string;
+  firstName?: string | null;
+  lastName?: string | null;
   fullName?: string | null;
-  role: string;
   lastLogin?: Date | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  token?: string | null;
 }
 
 export interface IUserCreate {
@@ -17,8 +19,9 @@ export interface IUserCreate {
   email: string;
   phone?: string;
   password: string;
+  firstName?: string;
+  lastName?: string;
   fullName?: string;
-  role?: string;
 }
 
 export interface IUserLogin {
