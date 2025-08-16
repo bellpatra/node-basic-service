@@ -13,7 +13,21 @@ import { ApiResponse } from './utils/validation';
 const app = express();
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.socket.io"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "blob:"],
+      connectSrc: ["'self'", "ws:", "wss:"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+}));
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   credentials: true // Allow cookies with CORS
@@ -21,6 +35,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve static files from public directory
+app.use(express.static('src/public'));
 
 // Logging
 app.use(requestLogger);
@@ -426,6 +443,13 @@ app.use('/api/qr', qrRoutes);
 
 // WhatsApp-like QR Login Page
 app.get('/qr-login', (req, res) => {
+  // Add cache-busting headers
+  res.set({
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+  });
+  
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -433,149 +457,8 @@ app.get('/qr-login', (req, res) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>QR Code Login - Like WhatsApp Web</title>
+        <link rel="stylesheet" href="/qr-login.css">
         <script src="/socket.io/socket.io.js"></script>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-            
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .qr-container {
-                background: white;
-                border-radius: 20px;
-                padding: 40px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                text-align: center;
-                max-width: 400px;
-                width: 90%;
-            }
-            
-            .logo {
-                font-size: 2.5rem;
-                margin-bottom: 20px;
-                color: #667eea;
-            }
-            
-            .title {
-                font-size: 1.5rem;
-                color: #333;
-                margin-bottom: 10px;
-                font-weight: 600;
-            }
-            
-            .subtitle {
-                color: #666;
-                margin-bottom: 30px;
-                line-height: 1.5;
-            }
-            
-            .qr-code {
-                margin: 30px 0;
-                padding: 20px;
-                background: #f8f9fa;
-                border-radius: 15px;
-            }
-            
-            .qr-code img {
-                max-width: 200px;
-                height: auto;
-                border-radius: 10px;
-            }
-            
-            .status {
-                padding: 15px;
-                border-radius: 10px;
-                margin: 20px 0;
-                font-weight: 500;
-            }
-            
-            .status.waiting {
-                background: #e3f2fd;
-                color: #1976d2;
-                border: 1px solid #bbdefb;
-            }
-            
-            .status.success {
-                background: #e8f5e8;
-                color: #2e7d32;
-                border: 1px solid #c8e6c9;
-            }
-            
-            .status.error {
-                background: #ffebee;
-                color: #c62828;
-                border: 1px solid #ffcdd2;
-            }
-            
-            .refresh-info {
-                color: #666;
-                font-size: 0.9rem;
-                margin-top: 20px;
-            }
-            
-            .loading {
-                display: inline-block;
-                width: 20px;
-                height: 20px;
-                border: 3px solid #f3f3f3;
-                border-top: 3px solid #667eea;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin-right: 10px;
-            }
-            
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            
-            .user-info {
-                background: #f8f9fa;
-                padding: 20px;
-                border-radius: 10px;
-                margin-top: 20px;
-                display: none;
-            }
-            
-            .user-info.show {
-                display: block;
-            }
-            
-            .user-avatar {
-                width: 60px;
-                height: 60px;
-                background: #667eea;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 1.5rem;
-                margin: 0 auto 15px;
-            }
-            
-            .user-name {
-                font-size: 1.2rem;
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 5px;
-            }
-            
-            .user-email {
-                color: #666;
-                font-size: 0.9rem;
-            }
-        </style>
     </head>
     <body>
         <div class="qr-container">
@@ -583,8 +466,24 @@ app.get('/qr-login', (req, res) => {
             <h1 class="title">QR Code Login</h1>
             <p class="subtitle">Scan this QR code with your mobile app to log in automatically</p>
             
-            <div class="qr-code">
-                <img id="qrImage" src="" alt="QR Code">
+            <div class="qr-code" id="qrCodeContainer">
+                <div class="qr-placeholder" id="qrPlaceholder">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3,11h8V3H3V11z M5,5h4v4H5V5z"/>
+                        <path d="M3,21h8v-8H3V21z M5,15h4v4H5V15z"/>
+                        <path d="M13,3v8h8V3H13z M19,9h-4V5h4V9z"/>
+                        <path d="M19,19h2v2h-2z"/>
+                        <path d="M13,13h2v2h-2z"/>
+                        <path d="M15,15h2v2h-2z"/>
+                        <path d="M13,17h2v2h-2z"/>
+                        <path d="M15,19h2v2h-2z"/>
+                        <path d="M17,13h2v2h-2z"/>
+                        <path d="M17,17h2v2h-2z"/>
+                        <path d="M19,15h2v2h-2z"/>
+                    </svg>
+                    <span>QR Code will appear here...</span>
+                </div>
+                <img id="qrImage" src="" alt="QR Code" style="display: none;">
             </div>
             
             <div class="status waiting" id="status">
@@ -596,108 +495,170 @@ app.get('/qr-login', (req, res) => {
                 QR code refreshes automatically every 5 seconds
             </div>
             
+            <div class="manual-refresh">
+                <button id="refreshBtn">Refresh QR Code Now</button>
+            </div>
+            
             <div class="user-info" id="userInfo">
                 <div class="user-avatar" id="userAvatar">👤</div>
                 <div class="user-name" id="userName"></div>
                 <div class="user-email" id="userEmail"></div>
             </div>
+
+            <div class="debug-info" id="debugInfo">
+                <strong>Debug Information:</strong><br>
+                Waiting for QR code generation...
+            </div>
         </div>
 
+        <script src="/qr-login.js"></script>
+    </body>
+    </html>
+  `);
+});
+
+// Simple test endpoint for debugging
+app.get('/qr-test', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>QR Test</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .test-container { max-width: 600px; margin: 0 auto; }
+            .qr-display { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+            button { padding: 10px 20px; margin: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+            button:hover { background: #0056b3; }
+            .error { color: red; }
+            .success { color: green; }
+            pre { background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        </style>
+    </head>
+    <body>
+        <div class="test-container">
+            <h1>QR Code Test</h1>
+            <p>This page tests the QR code generation and display functionality.</p>
+            
+            <div>
+                <button onclick="testQR()">Test QR Generation</button>
+                <button onclick="testDirectQR()">Test Direct QR Display</button>
+                <button onclick="clearResults()">Clear Results</button>
+            </div>
+            
+            <div class="qr-display">
+                <h3>QR Code Display:</h3>
+                <div id="qrContainer">
+                    <p>Click a button above to generate a QR code</p>
+                </div>
+            </div>
+            
+            <div class="qr-display">
+                <h3>API Response:</h3>
+                <div id="result">
+                    <p>No data yet</p>
+                </div>
+            </div>
+            
+            <div class="qr-display">
+                <h3>Debug Info:</h3>
+                <div id="debugInfo">
+                    <p>Ready for testing</p>
+                </div>
+            </div>
+        </div>
+        
         <script>
-            // Connect to WebSocket
-            const socket = io();
+            function addDebugInfo(message) {
+                const debugEl = document.getElementById('debugInfo');
+                const timestamp = new Date().toLocaleTimeString();
+                debugEl.innerHTML = \`<p><strong>[\${timestamp}]</strong> \${message}</p>\` + debugEl.innerHTML;
+            }
             
-            let currentSessionId = null;
-            let refreshInterval = null;
+            function clearResults() {
+                document.getElementById('qrContainer').innerHTML = '<p>Click a button above to generate a QR code</p>';
+                document.getElementById('result').innerHTML = '<p>No data yet</p>';
+                document.getElementById('debugInfo').innerHTML = '<p>Ready for testing</p>';
+            }
             
-            // Generate initial QR code
-            generateQRCode();
-            
-            // Listen for WebSocket events
-            socket.on('qr-authenticated', (data) => {
-                console.log('QR authenticated:', data);
-                showSuccess(data);
-            });
-            
-            socket.on('connect', () => {
-                console.log('Connected to WebSocket');
-            });
-            
-            socket.on('disconnect', () => {
-                console.log('Disconnected from WebSocket');
-            });
-            
-            async function generateQRCode() {
+            async function testQR() {
                 try {
-                    const response = await fetch('/api/qr/session');
+                    addDebugInfo('Testing QR generation from API...');
+                    
+                    const response = await fetch('/api/qr/session?t=' + Date.now());
                     const result = await response.json();
                     
+                    document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                    
                     if (result.status === 'success') {
-                        document.getElementById('qrImage').src = result.data.qrCode;
-                        currentSessionId = result.data.sessionId;
+                        addDebugInfo('API call successful, creating image element...');
                         
-                        // Set up auto-refresh
-                        if (refreshInterval) {
-                            clearInterval(refreshInterval);
-                        }
+                        const img = document.createElement('img');
+                        img.src = result.data.qrCode;
+                        img.style.width = '200px';
+                        img.style.height = '200px';
+                        img.style.border = '2px solid black';
+                        img.style.display = 'block';
                         
-                        refreshInterval = setInterval(() => {
-                            generateQRCode();
-                        }, 5000); // Refresh every 5 seconds
+                        // Add event listeners
+                        img.onload = () => {
+                            addDebugInfo('Image loaded successfully!');
+                        };
                         
-                        updateStatus('waiting', 'Waiting for QR code scan...');
+                        img.onerror = () => {
+                            addDebugInfo('Image failed to load!');
+                        };
+                        
+                        const container = document.getElementById('qrContainer');
+                        container.innerHTML = '';
+                        container.appendChild(img);
+                        
+                        addDebugInfo('Image element created and added to DOM');
                     } else {
-                        updateStatus('error', 'Failed to generate QR code');
+                        addDebugInfo('API returned error: ' + result.message);
                     }
                 } catch (error) {
-                    console.error('Error generating QR code:', error);
-                    updateStatus('error', 'Error generating QR code');
+                    addDebugInfo('Exception occurred: ' + error.message);
+                    document.getElementById('result').innerHTML = '<p class="error">Error: ' + error.message + '</p>';
                 }
             }
             
-            function updateStatus(type, message) {
-                const statusEl = document.getElementById('status');
-                statusEl.className = \`status \${type}\`;
-                
-                if (type === 'waiting') {
-                    statusEl.innerHTML = \`<span class="loading"></span>\${message}\`;
-                } else {
-                    statusEl.innerHTML = message;
+            function testDirectQR() {
+                try {
+                    addDebugInfo('Testing direct QR code display...');
+                    
+                    // Create a simple test QR code data
+                    const testData = {
+                        test: true,
+                        timestamp: new Date().toISOString(),
+                        message: "Hello QR Code!"
+                    };
+                    
+                    // Create a simple colored div as a placeholder
+                    const div = document.createElement('div');
+                    div.style.width = '200px';
+                    div.style.height = '200px';
+                    div.style.backgroundColor = '#007bff';
+                    div.style.color = 'white';
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.justifyContent = 'center';
+                    div.style.borderRadius = '10px';
+                    div.style.fontSize = '12px';
+                    div.style.textAlign = 'center';
+                    div.style.padding = '10px';
+                    div.innerHTML = 'Test QR<br>Placeholder';
+                    
+                    const container = document.getElementById('qrContainer');
+                    container.innerHTML = '';
+                    container.appendChild(div);
+                    
+                    addDebugInfo('Test placeholder created successfully');
+                    
+                } catch (error) {
+                    addDebugInfo('Error in direct test: ' + error.message);
                 }
             }
-            
-            function showSuccess(userData) {
-                updateStatus('success', 'Login successful! Welcome back!');
-                
-                // Show user info
-                document.getElementById('userAvatar').textContent = userData.username.charAt(0).toUpperCase();
-                document.getElementById('userName').textContent = userData.username;
-                document.getElementById('userEmail').textContent = userData.email;
-                document.getElementById('userInfo').classList.add('show');
-                
-                // Stop auto-refresh
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                }
-                
-                // Redirect after 3 seconds
-                setTimeout(() => {
-                    window.location.href = '/api-docs';
-                }, 3000);
-            }
-            
-            // Handle page visibility change to pause/resume refresh
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    if (refreshInterval) {
-                        clearInterval(refreshInterval);
-                    }
-                } else {
-                    if (!refreshInterval) {
-                        generateQRCode();
-                    }
-                }
-            });
         </script>
     </body>
     </html>
