@@ -7,31 +7,36 @@ import swaggerUi from 'swagger-ui-express';
 import { requestLogger, errorLogger } from './utils/logger';
 import userRoutes from './modules/user/user.route';
 import qrRoutes from './modules/qr/qr.route';
+import emailRoutes from './modules/email/email.route';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { ApiResponse } from './utils/validation';
 
 const app = express();
 
 // Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.socket.io"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'", "ws:", "wss:"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.socket.io'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'", 'ws:', 'wss:'],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
     },
-  },
-}));
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true // Allow cookies with CORS
-}));
+  })
+);
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || '*',
+    credentials: true, // Allow cookies with CORS
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -49,45 +54,50 @@ const swaggerOptions = {
     info: {
       title: 'Node Basic Service API',
       version: '1.0.1',
-      description: 'A robust, scalable authentication microservice built with Node.js, TypeScript, and modern best practices.',
+      description:
+        'A robust, scalable authentication microservice built with Node.js, TypeScript, and modern best practices.',
       contact: {
         name: 'API Support',
-        email: 'support@example.com'
+        email: 'support@example.com',
       },
       license: {
         name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
+        url: 'https://opensource.org/licenses/MIT',
+      },
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Development server'
+        description: 'Development server',
       },
       {
         url: 'http://localhost:5001',
-        description: 'Production server'
-      }
+        description: 'Production server',
+      },
     ],
     components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
           scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      }
-    }
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
-  apis: ['./src/modules/**/*.ts', './src/app.ts']
+  apis: ['./src/modules/**/*.ts', './src/app.ts'],
 };
 
 const specs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Node Basic Service API Documentation',
-  customfavIcon: '/favicon.ico'
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Node Basic Service API Documentation',
+    customfavIcon: '/favicon.ico',
+  })
+);
 
 // Landing page
 app.get('/', (req, res) => {
@@ -364,6 +374,9 @@ app.get('/', (req, res) => {
                     <a href="/qr-login" class="cta-button" style="font-size: 1.2rem; padding: 18px 35px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border: none; margin: 0 10px;">
                         📱 Try WhatsApp-Style QR Login
                     </a>
+                    <a href="/email-test" class="cta-button" style="font-size: 1.2rem; padding: 18px 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; margin: 0 10px;">
+                        📧 Test Email Service
+                    </a>
                 </div>
                 
                 <p style="margin-top: 20px; color: #666; font-size: 1rem;">
@@ -439,16 +452,17 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/qr', qrRoutes);
+app.use('/api/email', emailRoutes);
 
 // WhatsApp-like QR Login Page
 app.get('/qr-login', (req, res) => {
   // Add cache-busting headers
   res.set({
     'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0'
+    Pragma: 'no-cache',
+    Expires: '0',
   });
-  
+
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -514,6 +528,11 @@ app.get('/qr-login', (req, res) => {
     </body>
     </html>
   `);
+});
+
+// Email Testing Page
+app.get('/email-test', (req, res) => {
+  res.sendFile(__dirname + '/public/email-test.html');
 });
 
 // Simple test endpoint for debugging
@@ -710,9 +729,9 @@ app.use(errorMiddleware);
  */
 app.get('/health', (req, res) => {
   const response = ApiResponse.success(
-    { 
+    {
       uptime: process.uptime(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
     },
     'Service is healthy',
     200

@@ -19,12 +19,12 @@ const redis = new ioredis_1.default({
     host: _1.config.redis.host,
     port: _1.config.redis.port,
     password: _1.config.redis.password,
-    retryStrategy: (times) => {
+    retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
     },
 });
-redis.on('error', (error) => {
+redis.on('error', error => {
     console.error('Redis connection error:', error);
 });
 redis.on('connect', () => {

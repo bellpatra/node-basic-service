@@ -64,20 +64,20 @@ class MultiLoginExamples {
     // Successful login response (same for all identifier types)
     static successfulLogin(res) {
         const response = validation_1.ApiResponse.success({
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-            refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
             user: {
-                id: "123e4567-e89b-12d3-a456-426614174000",
-                username: "johndoe",
-                email: "john@example.com",
-                phone: "+1234567890",
-                fullName: "John Doe",
-                role: "user",
+                id: '123e4567-e89b-12d3-a456-426614174000',
+                username: 'johndoe',
+                email: 'john@example.com',
+                phone: '+1234567890',
+                fullName: 'John Doe',
+                role: 'user',
                 isActive: true,
-                lastLogin: "2024-01-15T10:30:00.000Z",
-                createdAt: "2024-01-01T00:00:00.000Z",
-                updatedAt: "2024-01-15T10:30:00.000Z"
-            }
+                lastLogin: '2024-01-15T10:30:00.000Z',
+                createdAt: '2024-01-01T00:00:00.000Z',
+                updatedAt: '2024-01-15T10:30:00.000Z',
+            },
         }, 'Login successful');
         return validation_1.ApiResponse.send(res, response);
         /* Response:
@@ -143,13 +143,13 @@ class MultiLoginExamples {
             {
                 field: 'phone',
                 message: 'Invalid phone number format',
-                code: 'invalid_format'
+                code: 'invalid_format',
             },
             {
                 field: 'password',
                 message: 'Password must contain uppercase, lowercase, number, and special character',
-                code: 'weak_password'
-            }
+                code: 'weak_password',
+            },
         ]);
         return validation_1.ApiResponse.send(res, response);
     }

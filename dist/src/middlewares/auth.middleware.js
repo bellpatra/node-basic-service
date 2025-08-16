@@ -25,20 +25,20 @@ const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
-                message: 'No token provided'
+                message: 'No token provided',
             });
         }
         const token = authHeader.split(' ')[1];
         const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
         req.user = {
-            id: decoded.userId
+            id: decoded.userId,
         };
         next();
     }
     catch (error) {
         return res.status(401).json({
             success: false,
-            message: 'Invalid token'
+            message: 'Invalid token',
         });
     }
 });

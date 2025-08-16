@@ -22,7 +22,7 @@ class Logger {
             level: LogLevel.INFO,
             message,
             timestamp: new Date().toISOString(),
-            metadata
+            metadata,
         };
         console.log(this.formatMessage(logMessage));
     }
@@ -31,7 +31,7 @@ class Logger {
             level: LogLevel.WARN,
             message,
             timestamp: new Date().toISOString(),
-            metadata
+            metadata,
         };
         console.warn(this.formatMessage(logMessage));
     }
@@ -40,7 +40,7 @@ class Logger {
             level: LogLevel.ERROR,
             message: `${message} | ${(error === null || error === void 0 ? void 0 : error.stack) || (error === null || error === void 0 ? void 0 : error.message) || 'Unknown error'}`,
             timestamp: new Date().toISOString(),
-            metadata
+            metadata,
         };
         console.error(this.formatMessage(logMessage));
     }
@@ -50,7 +50,7 @@ class Logger {
                 level: LogLevel.DEBUG,
                 message,
                 timestamp: new Date().toISOString(),
-                metadata
+                metadata,
             };
             console.debug(this.formatMessage(logMessage));
         }
@@ -70,7 +70,7 @@ const requestLogger = (req, res, next) => {
             statusCode: res.statusCode,
             duration: `${duration}ms`,
             userAgent: req.get('user-agent'),
-            ip: req.ip
+            ip: req.ip,
         };
         if (res.statusCode >= 400) {
             Logger.error('Request failed', undefined, logMessage);
@@ -91,7 +91,7 @@ const errorLogger = (error, req, res, next) => {
         path: req.path,
         body: req.body,
         query: req.query,
-        ip: req.ip
+        ip: req.ip,
     });
     next(error);
 };

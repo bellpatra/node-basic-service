@@ -45,7 +45,7 @@ class SecurityUtils {
     }
     static generateToken(payload) {
         return jsonwebtoken_1.default.sign(payload, config_1.config.jwt.secret, {
-            expiresIn: config_1.config.jwt.expiresIn
+            expiresIn: config_1.config.jwt.expiresIn,
         });
     }
     static verifyToken(token) {
@@ -66,7 +66,7 @@ class SecurityUtils {
     }
     static generateRefreshToken(userId) {
         return jsonwebtoken_1.default.sign({ userId }, config_1.config.jwt.refreshSecret, {
-            expiresIn: config_1.config.jwt.refreshExpiresIn
+            expiresIn: config_1.config.jwt.refreshExpiresIn,
         });
     }
     static verifyRefreshToken(token) {
@@ -97,25 +97,25 @@ class PasswordValidator {
         if (password.length < minLength) {
             return {
                 isValid: false,
-                message: `Password must be at least ${minLength} characters long`
+                message: `Password must be at least ${minLength} characters long`,
             };
         }
         if (!hasUpperCase || !hasLowerCase) {
             return {
                 isValid: false,
-                message: 'Password must contain both uppercase and lowercase letters'
+                message: 'Password must contain both uppercase and lowercase letters',
             };
         }
         if (!hasNumbers) {
             return {
                 isValid: false,
-                message: 'Password must contain at least one number'
+                message: 'Password must contain at least one number',
             };
         }
         if (!hasSpecialChar) {
             return {
                 isValid: false,
-                message: 'Password must contain at least one special character'
+                message: 'Password must contain at least one special character',
             };
         }
         return { isValid: true, message: 'Password is valid' };

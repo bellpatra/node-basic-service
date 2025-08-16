@@ -12,6 +12,7 @@ const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const logger_1 = require("./utils/logger");
 const user_route_1 = __importDefault(require("./modules/user/user.route"));
 const qr_route_1 = __importDefault(require("./modules/qr/qr.route"));
+const email_route_1 = __importDefault(require("./modules/email/email.route"));
 const error_middleware_1 = require("./middlewares/error.middleware");
 const validation_1 = require("./utils/validation");
 const app = (0, express_1.default)();
@@ -362,6 +363,9 @@ app.get('/', (req, res) => {
                     <a href="/qr-login" class="cta-button" style="font-size: 1.2rem; padding: 18px 35px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border: none; margin: 0 10px;">
                         📱 Try WhatsApp-Style QR Login
                     </a>
+                    <a href="/email-test" class="cta-button" style="font-size: 1.2rem; padding: 18px 35px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; margin: 0 10px;">
+                        📧 Test Email Service
+                    </a>
                 </div>
                 
                 <p style="margin-top: 20px; color: #666; font-size: 1rem;">
@@ -419,7 +423,6 @@ app.get('/', (req, res) => {
         <div style="text-align: center; margin: 40px 0;">
             <a href="/api-docs" class="cta-button" style="background: linear-gradient(45deg, #667eea, #764ba2); transform: scale(1.1);">🚀 Open Swagger Docs</a>
             <a href="/health" class="cta-button">🔍 Check API Health</a>
-            <a href="/api/users/register" class="cta-button">📝 Test Registration</a>
         </div>
         
         <div class="footer">
@@ -437,6 +440,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/users', user_route_1.default);
 app.use('/api/qr', qr_route_1.default);
+app.use('/api/email', email_route_1.default);
 // WhatsApp-like QR Login Page
 app.get('/qr-login', (req, res) => {
     // Add cache-busting headers
@@ -510,6 +514,10 @@ app.get('/qr-login', (req, res) => {
     </body>
     </html>
   `);
+});
+// Email Testing Page
+app.get('/email-test', (req, res) => {
+    res.sendFile(__dirname + '/public/email-test.html');
 });
 // Simple test endpoint for debugging
 app.get('/qr-test', (req, res) => {

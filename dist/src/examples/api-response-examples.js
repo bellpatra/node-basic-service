@@ -68,7 +68,7 @@ class ApiResponseExamples {
         const response = validation_1.ApiResponse.success({ id: 1, name: 'John Doe' }, 'User created successfully', 201, {
             timestamp: new Date().toISOString(),
             requestId: 'req_123456',
-            version: '1.0.0'
+            version: '1.0.0',
         });
         return validation_1.ApiResponse.send(res, response);
         /* Response:
@@ -107,12 +107,12 @@ class ApiResponseExamples {
     static paginatedResponse(res) {
         const users = [
             { id: 1, name: 'John Doe' },
-            { id: 2, name: 'Jane Smith' }
+            { id: 2, name: 'Jane Smith' },
         ];
         const response = validation_1.ApiResponse.paginated(users, {
             page: 1,
             limit: 10,
-            total: 25
+            total: 25,
         }, 'Users retrieved successfully');
         return validation_1.ApiResponse.send(res, response);
         /* Response:
@@ -175,13 +175,13 @@ class ApiResponseExamples {
             {
                 field: 'email',
                 message: 'Invalid email format',
-                code: 'invalid_email'
+                code: 'invalid_email',
             },
             {
                 field: 'password',
                 message: 'Password must be at least 8 characters',
-                code: 'min_length'
-            }
+                code: 'min_length',
+            },
         ]);
         return validation_1.ApiResponse.send(res, response);
         /* Response:
@@ -289,7 +289,7 @@ class ApiResponseExamples {
                 return user;
             }), 'User retrieved successfully', 200, {
                 timestamp: new Date().toISOString(),
-                requestId: 'req_123456'
+                requestId: 'req_123456',
             });
         });
     }

@@ -26,7 +26,7 @@ const validateRequest = (schema) => {
                 const validationErrors = error.errors.map(err => ({
                     field: err.path.join('.'),
                     message: err.message,
-                    code: err.code
+                    code: err.code,
                 }));
                 const response = ApiResponse.fail('Validation failed', 400, validationErrors);
                 return ApiResponse.send(res, response);
@@ -63,7 +63,7 @@ class ApiResponse {
             status: 'error',
             statusCode,
             message,
-            meta: Object.assign({ timestamp: new Date().toISOString() }, meta)
+            meta: Object.assign({ timestamp: new Date().toISOString() }, meta),
         };
     }
     /**
@@ -83,7 +83,7 @@ class ApiResponse {
             statusCode,
             message,
             data,
-            meta: Object.assign({ timestamp: new Date().toISOString(), pagination: Object.assign(Object.assign({}, pagination), { totalPages }) }, meta)
+            meta: Object.assign({ timestamp: new Date().toISOString(), pagination: Object.assign(Object.assign({}, pagination), { totalPages }) }, meta),
         };
     }
     /**
@@ -109,18 +109,14 @@ class ApiResponse {
                     const validationErrors = error.errors.map(err => ({
                         field: err.path.join('.'),
                         message: err.message,
-                        code: err.code
+                        code: err.code,
                     }));
                     const response = ApiResponse.fail('Validation failed', 400, validationErrors, meta);
                     return ApiResponse.send(res, response);
                 }
                 // Handle custom errors with statusCode
-                const statusCode = error instanceof Error && error.statusCode
-                    ? error.statusCode
-                    : 500;
-                const errorMessage = error instanceof Error
-                    ? error.message
-                    : 'Internal server error';
+                const statusCode = error instanceof Error && error.statusCode ? error.statusCode : 500;
+                const errorMessage = error instanceof Error ? error.message : 'Internal server error';
                 // Use fail for client errors (4xx), error for server errors (5xx)
                 const response = statusCode >= 400 && statusCode < 500
                     ? ApiResponse.fail(errorMessage, statusCode, undefined, meta)
