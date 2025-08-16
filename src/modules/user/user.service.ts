@@ -29,7 +29,7 @@ export class UserService {
    */
   static async createUser(userData: IUserCreate): Promise<Omit<IUser, 'password'>> {
     // Build OR conditions for uniqueness check
-    const orConditions = [
+    const orConditions: any[] = [
       { username: userData.username },
       { email: userData.email }
     ];
@@ -67,7 +67,7 @@ export class UserService {
         phone: userData.phone,
         password: hashedPassword,
         fullName: userData.fullName,
-        role: userData.role || 'user',
+        role: (userData.role || 'user') as string,
         isActive: true
       }
     });
@@ -209,7 +209,7 @@ export class UserService {
 
     if (!user) return null;
 
-    // Remove password and cache
+    // Remove password
     const { password: _, ...userWithoutPassword } = user;
     await CacheService.set(`${USER_CACHE_KEY}${id}`, userWithoutPassword, 3600);
     
@@ -283,7 +283,7 @@ export class UserService {
    */
   static async requestPasswordReset(email: string): Promise<void> {
     // Find user by email
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: { email }
     });
 

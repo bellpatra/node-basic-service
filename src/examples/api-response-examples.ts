@@ -69,6 +69,7 @@ export class ApiResponseExamples {
       'User created successfully',
       201,
       {
+        timestamp: new Date().toISOString(),
         requestId: 'req_123456',
         version: '1.0.0'
       }
@@ -336,6 +337,7 @@ export class ApiResponseExamples {
       'User retrieved successfully',
       200,
       {
+        timestamp: new Date().toISOString(),
         requestId: 'req_123456'
       }
     );

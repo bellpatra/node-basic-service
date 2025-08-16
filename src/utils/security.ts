@@ -28,9 +28,9 @@ export class SecurityUtils {
   }
 
   static generateToken(payload: TokenPayload): string {
-    return jwt.sign(payload, String(config.jwt.secret), {
+    return jwt.sign(payload, config.jwt.secret, {
       expiresIn: config.jwt.expiresIn
-    });
+    } as jwt.SignOptions);
   }
 
   static verifyToken(token: string): TokenPayload {
@@ -53,7 +53,7 @@ export class SecurityUtils {
   static generateRefreshToken(userId: string): string {
     return jwt.sign({ userId }, config.jwt.refreshSecret, {
       expiresIn: config.jwt.refreshExpiresIn
-    });
+    } as jwt.SignOptions);
   }
 
   static verifyRefreshToken(token: string): { userId: string } {

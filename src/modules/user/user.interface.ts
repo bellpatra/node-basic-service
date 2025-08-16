@@ -2,11 +2,11 @@ export interface IUser {
   id: string;
   username: string;
   email: string;
-  phone?: string;
+  phone?: string | null;
   password: string;
-  fullName?: string;
-  role: 'user' | 'admin';
-  lastLogin?: Date;
+  fullName?: string | null;
+  role: string;
+  lastLogin?: Date | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -18,7 +18,7 @@ export interface IUserCreate {
   phone?: string;
   password: string;
   fullName?: string;
-  role?: 'user' | 'admin';
+  role?: string;
 }
 
 export interface IUserLogin {
